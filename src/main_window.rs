@@ -53,6 +53,7 @@ impl MainWindow {
 			gtk::main_quit();
 			Inhibit(false)
 		});
+		self.window.resize(640, 400);
 		self.window.show_all();
 	}
 

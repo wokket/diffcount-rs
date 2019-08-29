@@ -44,9 +44,9 @@ fn main() {
                     .expect(&format!("Unable to find channel at index {}", i));
                 // actually bump up the value
                 channel.increment();
-            }
+            } //drop the mut borrow here
 
-            gui.update(&state);
+            gui.update(&state); //this takes a non-mut borrow
         });
     }
 
