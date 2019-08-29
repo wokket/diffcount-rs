@@ -1,5 +1,6 @@
 use gtk::prelude::*;
 use std::collections::HashMap;
+use std::ops::Range;
 
 use crate::state::State;
 
@@ -10,7 +11,7 @@ pub struct MainWindow {
 
 	/// The number of channels this calc can handle.
 	/// Note that channels are 1-indexed, so ranges using this need to be `1..num_channels + 1`
-	pub num_channels: i8,
+	num_channels: i8,
 }
 
 impl MainWindow {
@@ -28,7 +29,7 @@ impl MainWindow {
 
 		//add the buttons for each channel
 		let mut buttons: HashMap<i8, gtk::Button> = HashMap::new();
-		for channel in 1..num_channels + 1 {
+		for channel in MainWindow::channel_range_internal(num_channels) {
 			let name = format!("btn{}", channel);
 			buttons.insert(
 				channel,
@@ -55,7 +56,9 @@ impl MainWindow {
 		self.window.show_all();
 	}
 
-	pub fn update_channel(&self, channel: &i8, value: i32, percent: f32) {
+	/// Updates a single channel of data, generally dangerous to call in
+	/// isolation as percentages generally require a global update.
+	fn update_channel(&self, channel: &i8, value: i32, percent: f32) {
 		let btn = self.get_button(channel);
 		let text = format!(
 			"Channel {}\nCount: {} ({:.2}%)",
@@ -66,6 +69,7 @@ impl MainWindow {
 		btn.set_label(&text);
 	}
 
+	/// Triggers a full update of the UI to reflect the nature of the given `State`
 	pub fn update(&self, state: &State) {
 		let total = state.total_count();
 
@@ -81,6 +85,17 @@ impl MainWindow {
 		}
 	}
 
+	/// Helper function to get a range that covers all the channels correctly.
+	pub fn channel_range(&self) -> Range<i8> {
+		MainWindow::channel_range_internal(self.num_channels)
+	}
+
+	fn channel_range_internal(i: i8) -> Range<i8> {
+		1..i + 1
+	}
+
+	/// Gets the button associated with the given channel.  
+	/// If passed an invalid channel this method will panic.
 	pub fn get_button(&self, num: &i8) -> &gtk::Button {
 		self.buttons
 			.get(num)
