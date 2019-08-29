@@ -26,6 +26,7 @@ fn main() {
 
     let state: Arc<State> = Arc::new(State {
         channels: RefCell::new(channels),
+        alarm_count: 100,
     });
 
     gui.update(&state);

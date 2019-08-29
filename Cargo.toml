@@ -9,6 +9,7 @@ description = "GTK app for lab counting of cells."
 
 [dependencies]
 glib = "0.8.1"
+gdk = "0.11.0"
 
 [dependencies.gtk]
 version = "0.7.0"

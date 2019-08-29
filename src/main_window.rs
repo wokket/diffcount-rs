@@ -1,3 +1,4 @@
+use gdk::beep;
 use gtk::prelude::*;
 use std::collections::HashMap;
 use std::ops::Range;
@@ -83,6 +84,11 @@ impl MainWindow {
 				c.get_count(),
 				State::calc_percentage(c.get_count(), total),
 			);
+		}
+
+		if total % state.alarm_count == 0 {
+			// trigger a small alarm
+			beep();
 		}
 	}
 

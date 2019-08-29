@@ -6,6 +6,8 @@ use crate::channel::Channel;
 /// Reflects the current running state of the application.
 pub struct State {
 	pub channels: RefCell<HashMap<i8, Channel>>,
+	/// Trigger a small alarm every `alarm_count` total entries, so users know how many they're up to.
+	pub alarm_count: i32,
 }
 
 impl State {
