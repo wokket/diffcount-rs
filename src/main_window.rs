@@ -1,42 +1,87 @@
 use gtk::prelude::*;
-//use std::collections::HashMap;
+use std::collections::HashMap;
 
+/// This represents the UI widgets for the window.
 pub struct MainWindow {
 	window: gtk::Window,
-	// result: gtk::Label,
-	// popover: gtk::Popover,
-	// error_label: gtk::Label,
-	// user_spec_entry: gtk::Entry,
-	// buttons: HashMap<String, gtk::Button>,
+	count_boxes: HashMap<i8, gtk::Entry>,
+	buttons: HashMap<i8, gtk::Button>,
+
+	/// The number of channels this calc can handle.
+	/// Note that channels are 1-indexed, so ranges using this need to be `1..num_channels + 1`
+	pub num_channels: i8,
 }
 
 impl MainWindow {
 	pub fn new() -> MainWindow {
+		let num_channels = 5;
+
 		// Initialize the UI from the Glade XML.
 		let glade_src = include_str!("main_window.glade");
 		let builder = gtk::Builder::new_from_string(glade_src);
 
 		// Get handles for the various controls we need to use.
-		let window: gtk::Window = builder.get_object("mainWindow").unwrap();
+		let window: gtk::Window = builder.get_object("mainWindow").expect(&format!(
+			"Could not get object 'mainWindow' from .glade file."
+		));
+
+		//add the buttons for each channel
+		let mut buttons: HashMap<i8, gtk::Button> = HashMap::new();
+		for channel in 1..num_channels + 1 {
+			let name = format!("btn{}", channel);
+			buttons.insert(
+				channel,
+				builder
+					.get_object(&name)
+					.expect(&format!("Could not get button '{}' from .glade file", name)),
+			);
+		}
+
+		//add the counter text boxes for each channel
+		let mut count_boxes: HashMap<i8, gtk::Entry> = HashMap::new();
+		for channel in 1..num_channels + 1 {
+			let name = format!("txtCount{}", channel);
+			count_boxes.insert(
+				channel,
+				builder.get_object(&name).expect(&format!(
+					"Could not get text box '{}' from .glade file",
+					name
+				)),
+			);
+		}
 
 		MainWindow {
 			window,
-			// result,
-			// popover,
-			// error_label,
-			// user_spec_entry,
-			// buttons,
+			count_boxes,
+			buttons,
+			num_channels,
 		}
 	}
 
 	// Set up naming for the window and show it to the user.
 	pub fn start(&self) {
-		glib::set_application_name("diffCounter");
-		self.window.set_wmclass("Diff Counter", "Diff Counter");
+		glib::set_application_name("Diff Counter");
 		self.window.connect_delete_event(|_, _| {
 			gtk::main_quit();
 			Inhibit(false)
 		});
 		self.window.show_all();
+	}
+
+	pub fn update_channel(&self, channel: &i8, value: i32) {
+		let textbox = self.count_box(channel);
+		textbox.set_text(&value.to_string());
+	}
+
+	pub fn get_button(&self, num: &i8) -> &gtk::Button {
+		self.buttons
+			.get(num)
+			.expect(&format!("Could not get button {}.", num))
+	}
+
+	fn count_box(&self, num: &i8) -> &gtk::Entry {
+		self.count_boxes
+			.get(num)
+			.expect(&format!("Could not get Entry {}.", num))
 	}
 }
