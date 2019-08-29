@@ -5,6 +5,7 @@ use std::collections::HashMap;
 pub struct MainWindow {
 	window: gtk::Window,
 	count_boxes: HashMap<i8, gtk::Entry>,
+	percent_boxes: HashMap<i8, gtk::Entry>,
 	buttons: HashMap<i8, gtk::Button>,
 
 	/// The number of channels this calc can handle.
@@ -50,15 +51,29 @@ impl MainWindow {
 			);
 		}
 
+		//add the percentage boxes
+		let mut percent_boxes: HashMap<i8, gtk::Entry> = HashMap::new();
+		for channel in 1..num_channels + 1 {
+			let name = format!("txtPercent{}", channel);
+			percent_boxes.insert(
+				channel,
+				builder.get_object(&name).expect(&format!(
+					"Could not get text box '{}' from .glade file",
+					name
+				)),
+			);
+		}
+
 		MainWindow {
 			window,
 			count_boxes,
+			percent_boxes,
 			buttons,
 			num_channels,
 		}
 	}
 
-	// Set up naming for the window and show it to the user.
+	/// Set up naming for the window and show it to the user.
 	pub fn start(&self) {
 		glib::set_application_name("Diff Counter");
 		self.window.connect_delete_event(|_, _| {
@@ -68,9 +83,13 @@ impl MainWindow {
 		self.window.show_all();
 	}
 
-	pub fn update_channel(&self, channel: &i8, value: i32) {
-		let textbox = self.count_box(channel);
-		textbox.set_text(&value.to_string());
+	pub fn update_channel(&self, channel: &i8, value: i32, percent: f32) {
+		let count_box = self.count_box(channel);
+		count_box.set_text(&value.to_string());
+
+		let percent_box = self.percent_box(channel);
+
+		percent_box.set_text(&format!("{}%", &percent * 100.0));
 	}
 
 	pub fn get_button(&self, num: &i8) -> &gtk::Button {
@@ -81,6 +100,12 @@ impl MainWindow {
 
 	fn count_box(&self, num: &i8) -> &gtk::Entry {
 		self.count_boxes
+			.get(num)
+			.expect(&format!("Could not get Entry {}.", num))
+	}
+
+	fn percent_box(&self, num: &i8) -> &gtk::Entry {
+		self.percent_boxes
 			.get(num)
 			.expect(&format!("Could not get Entry {}.", num))
 	}
