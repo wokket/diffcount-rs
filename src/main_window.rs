@@ -6,8 +6,6 @@ use crate::state::State;
 /// This represents the UI widgets for the window.
 pub struct MainWindow {
 	window: gtk::Window,
-	count_boxes: HashMap<i8, gtk::Entry>,
-	percent_boxes: HashMap<i8, gtk::Entry>,
 	buttons: HashMap<i8, gtk::Button>,
 
 	/// The number of channels this calc can handle.
@@ -17,7 +15,7 @@ pub struct MainWindow {
 
 impl MainWindow {
 	pub fn new() -> MainWindow {
-		let num_channels = 5;
+		let num_channels = 12;
 
 		// Initialize the UI from the Glade XML.
 		let glade_src = include_str!("main_window.glade");
@@ -40,36 +38,8 @@ impl MainWindow {
 			);
 		}
 
-		//add the counter text boxes for each channel
-		let mut count_boxes: HashMap<i8, gtk::Entry> = HashMap::new();
-		for channel in 1..num_channels + 1 {
-			let name = format!("txtCount{}", channel);
-			count_boxes.insert(
-				channel,
-				builder.get_object(&name).expect(&format!(
-					"Could not get text box '{}' from .glade file",
-					name
-				)),
-			);
-		}
-
-		//add the percentage boxes
-		let mut percent_boxes: HashMap<i8, gtk::Entry> = HashMap::new();
-		for channel in 1..num_channels + 1 {
-			let name = format!("txtPercent{}", channel);
-			percent_boxes.insert(
-				channel,
-				builder.get_object(&name).expect(&format!(
-					"Could not get text box '{}' from .glade file",
-					name
-				)),
-			);
-		}
-
 		MainWindow {
 			window,
-			count_boxes,
-			percent_boxes,
 			buttons,
 			num_channels,
 		}
@@ -86,11 +56,14 @@ impl MainWindow {
 	}
 
 	pub fn update_channel(&self, channel: &i8, value: i32, percent: f32) {
-		let count_box = self.count_box(channel);
-		count_box.set_text(&value.to_string());
-
-		let percent_box = self.percent_box(channel);
-		percent_box.set_text(&format!("{:.2}%", &percent * 100.0));
+		let btn = self.get_button(channel);
+		let text = format!(
+			"Channel {}\nCount: {} ({:.2}%)",
+			channel,
+			value,
+			&percent * 100.0
+		);
+		btn.set_label(&text);
 	}
 
 	pub fn update(&self, state: &State) {
@@ -112,17 +85,5 @@ impl MainWindow {
 		self.buttons
 			.get(num)
 			.expect(&format!("Could not get button {}.", num))
-	}
-
-	fn count_box(&self, num: &i8) -> &gtk::Entry {
-		self.count_boxes
-			.get(num)
-			.expect(&format!("Could not get Entry {}.", num))
-	}
-
-	fn percent_box(&self, num: &i8) -> &gtk::Entry {
-		self.percent_boxes
-			.get(num)
-			.expect(&format!("Could not get Entry {}.", num))
 	}
 }

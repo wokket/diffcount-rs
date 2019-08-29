@@ -16,3 +16,4 @@ mkdir publish\share\icons
 :: Remming out until then as it's waaay too many files just for minimise icons...
 ::xcopy %VCPKGDIR%\installed\x64-windows\share\icons publish\share\icons /S
 
+copy publish_readme.txt publish\readme.txt
