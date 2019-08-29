@@ -15,4 +15,12 @@ impl State {
 			.map(|(_, c)| c.get_count())
 			.sum()
 	}
+
+	pub fn calc_percentage(x: i32, t: i32) -> f32 {
+		if t == 0 {
+			return 0.0;
+		}
+
+		return x as f32 / t as f32;
+	}
 }

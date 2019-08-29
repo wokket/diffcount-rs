@@ -1,6 +1,8 @@
 use gtk::prelude::*;
 use std::collections::HashMap;
 
+use crate::state::State;
+
 /// This represents the UI widgets for the window.
 pub struct MainWindow {
 	window: gtk::Window,
@@ -88,8 +90,22 @@ impl MainWindow {
 		count_box.set_text(&value.to_string());
 
 		let percent_box = self.percent_box(channel);
+		percent_box.set_text(&format!("{:.2}%", &percent * 100.0));
+	}
 
-		percent_box.set_text(&format!("{}%", &percent * 100.0));
+	pub fn update(&self, state: &State) {
+		let total = state.total_count();
+
+		self.window
+			.set_title(&format!("Diff Counter (Total: {})", total));
+
+		for (i, c) in state.channels.borrow().iter() {
+			self.update_channel(
+				i,
+				c.get_count(),
+				State::calc_percentage(c.get_count(), total),
+			);
+		}
 	}
 
 	pub fn get_button(&self, num: &i8) -> &gtk::Button {

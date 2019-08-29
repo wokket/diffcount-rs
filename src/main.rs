@@ -28,7 +28,7 @@ fn main() {
         channels: RefCell::new(channels),
     });
 
-    update_ui(&gui, &state);
+    gui.update(&state);
 
     for i in 1..gui.num_channels + 1 {
         let btn = gui.get_button(&i);
@@ -36,35 +36,20 @@ fn main() {
         let state = Arc::clone(&state);
 
         btn.connect_clicked(move |_| {
-            let mut channels = state.channels.borrow_mut();
+            {
+                //one block for the mut borrow in order to increment the data
+                let mut channels = state.channels.borrow_mut();
+                let channel = channels
+                    .get_mut(&i)
+                    .expect(&format!("Unable to find channel at index {}", i));
+                // actually bump up the value
+                channel.increment();
+            }
 
-            let channel = channels
-                .get_mut(&i)
-                .expect(&format!("Unable to find channel at index {}", i));
-            // actually bump up the value
-            channel.increment();
-
-            let count = channel.get_count();
-            //let total = state.total_count();
-            let total = channels.iter().map(|(_, c)| c.get_count()).sum();
-            gui.update_channel(&i, count, calc_percentage(count, total));
+            gui.update(&state);
         });
     }
 
     gui.start();
     gtk::main();
-}
-
-fn update_ui(gui: &Arc<MainWindow>, state: &State) {
-    for (i, channel) in state.channels.borrow().iter() {
-        gui.update_channel(&i, channel.get_count(), 0.0);
-    }
-}
-
-fn calc_percentage(x: i32, t: i32) -> f32 {
-    if t == 0 {
-        return 0.0;
-    }
-
-    return x as f32 / t as f32;
 }
