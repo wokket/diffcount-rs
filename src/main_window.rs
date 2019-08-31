@@ -1,6 +1,5 @@
 use gdk::beep;
 use gtk::prelude::*;
-//use std::collections::HashMap;
 use std::ops::Range;
 
 use crate::state::State;
@@ -99,6 +98,9 @@ impl MainWindow {
 	/// Gets the button associated with the given channel.  
 	/// If passed an invalid channel this method will panic.
 	pub fn get_button(&self, num: i8) -> &gtk::Button {
-		&self.buttons[num as usize] //.expect(&format!("Could not get button {}.", num))
+		&self
+			.buttons
+			.get(num as usize)
+			.expect(&format!("Could not get button {}.", num))
 	}
 }
