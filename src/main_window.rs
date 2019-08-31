@@ -1,6 +1,6 @@
 use gdk::beep;
 use gtk::prelude::*;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::ops::Range;
 
 use crate::state::State;
@@ -8,17 +8,15 @@ use crate::state::State;
 /// This represents the UI widgets for the window.
 pub struct MainWindow {
 	window: gtk::Window,
-	buttons: HashMap<i8, gtk::Button>,
-
-	/// The number of channels this calc can handle.
-	/// Note that channels are 1-indexed, so ranges using this need to be `1..num_channels + 1`
-	num_channels: i8,
+	buttons: Vec<gtk::Button>,
 }
+
+/// The number of channels this calc can handle.
+/// Note that channels are 1-indexed, so ranges using this need to be `1..num_channels + 1`
+pub const NUM_CHANNELS: i8 = 12;
 
 impl MainWindow {
 	pub fn new() -> MainWindow {
-		let num_channels = 12;
-
 		// Initialize the UI from the Glade XML.
 		let glade_src = include_str!("main_window.glade");
 		let builder = gtk::Builder::new_from_string(glade_src);
@@ -28,23 +26,20 @@ impl MainWindow {
 			"Could not get object 'mainWindow' from .glade file."
 		));
 
-		//add the buttons for each channel
-		let mut buttons: HashMap<i8, gtk::Button> = HashMap::new();
-		for channel in MainWindow::channel_range_internal(num_channels) {
+		// add the buttons for each channel
+		// Remember that Array's can't be initialised empty and then populated, so we'll make a Vec and then clone, rather than deal with Option<Button> till the end of days.
+		let mut buttons: Vec<gtk::Button> = Vec::new();
+		for channel in MainWindow::channel_range() {
 			let name = format!("btn{}", channel);
-			buttons.insert(
-				channel,
+			buttons.push(
 				builder
 					.get_object(&name)
 					.expect(&format!("Could not get button '{}' from .glade file", name)),
 			);
 		}
 
-		MainWindow {
-			window,
-			buttons,
-			num_channels,
-		}
+		buttons.shrink_to_fit(); // ensure we only use as much memory as required.  This incurs a dealloc cost now, but reduced memory ongoing.
+		MainWindow { window, buttons }
 	}
 
 	/// Set up naming for the window and show it to the user.
@@ -60,11 +55,11 @@ impl MainWindow {
 
 	/// Updates a single channel of data, generally dangerous to call in
 	/// isolation as percentages generally require a global update.
-	fn update_channel(&self, channel: &i8, value: i32, percent: f32) {
+	fn update_channel(&self, channel: i8, value: i32, percent: f32) {
 		let btn = self.get_button(channel);
 		let text = format!(
 			"Channel {}\nCount: {} ({:.2}%)",
-			channel,
+			channel + 1, //account for 0-based indexing
 			value,
 			&percent * 100.0
 		);
@@ -80,7 +75,7 @@ impl MainWindow {
 
 		for (i, c) in state.channels.borrow().iter() {
 			self.update_channel(
-				i,
+				*i,
 				c.get_count(),
 				State::calc_percentage(c.get_count(), total),
 			);
@@ -88,24 +83,22 @@ impl MainWindow {
 
 		if total % state.alarm_count == 0 {
 			// trigger a small alarm
-			beep();
+			let num_beeps = total / state.alarm_count;
+			for _ in 0..num_beeps {
+				//NOTE: Multiple beeps not working atm... Needs ?delay?
+				beep();
+			}
 		}
 	}
 
 	/// Helper function to get a range that covers all the channels correctly.
-	pub fn channel_range(&self) -> Range<i8> {
-		MainWindow::channel_range_internal(self.num_channels)
-	}
-
-	fn channel_range_internal(i: i8) -> Range<i8> {
-		1..i + 1
+	pub fn channel_range() -> Range<i8> {
+		0..NUM_CHANNELS
 	}
 
 	/// Gets the button associated with the given channel.  
 	/// If passed an invalid channel this method will panic.
-	pub fn get_button(&self, num: &i8) -> &gtk::Button {
-		self.buttons
-			.get(num)
-			.expect(&format!("Could not get button {}.", num))
+	pub fn get_button(&self, num: i8) -> &gtk::Button {
+		&self.buttons[num as usize] //.expect(&format!("Could not get button {}.", num))
 	}
 }

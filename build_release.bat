@@ -1,12 +1,14 @@
 @echo off
 
-cargo build --release
-
+:: Get an output dir
 if exist .\publish\ rmdir /S /Q .\publish
-
 mkdir publish
 
+:: Release build into dir
+cargo build --release
 copy target\release\*.exe .\publish\
+
+:: GTK .dll dependencies into the publish folder
 copy %VCPKGDIR%\installed\x64-windows\bin\*.dll .\publish\
 
 :: Get The icons copied

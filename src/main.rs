@@ -20,19 +20,19 @@ fn main() {
 
     // Create our channel state
     let mut channels: HashMap<i8, Channel> = HashMap::new();
-    for i in gui.channel_range() {
+    for i in MainWindow::channel_range() {
         channels.insert(i, Channel::new(i));
     }
 
     let state: Arc<State> = Arc::new(State {
         channels: RefCell::new(channels),
-        alarm_count: 100,
+        alarm_count: 10,
     });
 
     gui.update(&state);
 
-    for i in gui.channel_range() {
-        let btn = gui.get_button(&i);
+    for i in MainWindow::channel_range() {
+        let btn = gui.get_button(i);
         let gui = Arc::clone(&gui);
         let state = Arc::clone(&state);
 
