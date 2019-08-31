@@ -27,7 +27,7 @@ impl MainWindow {
 
 		// add the buttons for each channel
 		// Remember that Array's can't be initialised empty and then populated, so we'll make a Vec and then clone, rather than deal with Option<Button> till the end of days.
-		let mut buttons: Vec<gtk::Button> = Vec::new();
+		let mut buttons: Vec<gtk::Button> = Vec::with_capacity(NUM_CHANNELS as usize);
 		for channel in MainWindow::channel_range() {
 			let name = format!("btn{}", channel);
 			buttons.push(
@@ -37,7 +37,6 @@ impl MainWindow {
 			);
 		}
 
-		buttons.shrink_to_fit(); // ensure we only use as much memory as required.  This incurs a dealloc cost now, but reduced memory ongoing.
 		MainWindow { window, buttons }
 	}
 

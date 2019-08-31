@@ -18,7 +18,7 @@ fn main() {
     let gui = Arc::new(MainWindow::new());
 
     // Create our channel state
-    let mut channels: Vec<Channel> = Vec::new();
+    let mut channels: Vec<Channel> = Vec::with_capacity(main_window::NUM_CHANNELS as usize);
     for i in MainWindow::channel_range() {
         channels.push(Channel::new(i));
     }
