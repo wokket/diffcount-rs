@@ -1,7 +1,7 @@
 /// Reflects the state and management of a single channel on the counter.
 #[allow(dead_code)]
 pub struct Channel {
-	channel_num: i8, //this feels like important info, yet we haven't used it yet...
+	pub channel_num: i8, //this feels like important info, yet we haven't used it yet...
 	count: i32,
 }
 

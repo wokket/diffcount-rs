@@ -1,11 +1,9 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
-
 use crate::channel::Channel;
+use std::cell::RefCell;
 
 /// Reflects the current running state of the application.
 pub struct State {
-	pub channels: RefCell<HashMap<i8, Channel>>,
+	pub channels: RefCell<Vec<Channel>>,
 	/// Trigger a small alarm every `alarm_count` total entries, so users know how many they're up to.
 	pub alarm_count: i32,
 }
@@ -17,7 +15,7 @@ impl State {
 		self.channels
 			.borrow()
 			.iter()
-			.map(|(_, c)| c.get_count())
+			.map(|channel| channel.get_count())
 			.sum()
 	}
 

@@ -1,6 +1,5 @@
 use gtk::prelude::*;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 mod main_window;
@@ -19,9 +18,9 @@ fn main() {
     let gui = Arc::new(MainWindow::new());
 
     // Create our channel state
-    let mut channels: HashMap<i8, Channel> = HashMap::new();
+    let mut channels: Vec<Channel> = Vec::new();
     for i in MainWindow::channel_range() {
-        channels.insert(i, Channel::new(i));
+        channels.push(Channel::new(i));
     }
 
     let state: Arc<State> = Arc::new(State {
@@ -41,7 +40,7 @@ fn main() {
                 //one block for the mut borrow in order to increment the data
                 let mut channels = state.channels.borrow_mut();
                 let channel = channels
-                    .get_mut(&i)
+                    .get_mut(i as usize)
                     .expect(&format!("Unable to find channel at index {}", i));
                 // actually bump up the value
                 channel.increment();

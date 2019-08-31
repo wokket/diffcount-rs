@@ -73,9 +73,9 @@ impl MainWindow {
 		self.window
 			.set_title(&format!("Diff Counter (Total: {})", total));
 
-		for (i, c) in state.channels.borrow().iter() {
+		for (i, c) in state.channels.borrow().iter().enumerate() {
 			self.update_channel(
-				*i,
+				i as i8, // this is more dangerous, as this is a shrinking operation
 				c.get_count(),
 				State::calc_percentage(c.get_count(), total),
 			);
