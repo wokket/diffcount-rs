@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"] //don't show a console window as well as the GUI
+
 use gtk::prelude::*;
 use std::cell::RefCell;
 use std::sync::Arc;
