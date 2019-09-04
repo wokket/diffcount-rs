@@ -10,6 +10,9 @@ copy target\release\*.exe .\publish\
 
 :: GTK .dll dependencies into the publish folder
 copy %VCPKGDIR%\installed\x64-windows\bin\*.dll .\publish\
+:: remove surplus files
+del .\publish\gtk-3.0.dll
+del .\publish\gdk-3.0.dll
 
 :: Get The icons copied
 mkdir publish\share\icons
